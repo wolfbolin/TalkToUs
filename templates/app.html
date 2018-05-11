@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>悄悄说</title>
+  <!-- import CSS -->
+  <link rel="stylesheet" href="{{url_for('static',filename='amazeui.min.css')}}">
+  <style>
+  .wb-message{
+      margin: 1.2em;
+      padding: 1em;
+      overflow: auto;
+  }
+  .wb-textarea{
+      width: 100%;
+      margin-top: 1.2em;
+      margin-bottom: 1.6em;
+  }
+  .wb-control{
+      padding: 1.6em;
+  }
+  .wb-dialog{
+      padding: 2em;
+  }
+  </style>
+</head>
+<body>
+<section>
+    <div class="am-g am-g-fixed" id="message_panel">
+        <div class="am-u-sm-10 am-u-sm-centered">
+            <div class="am-panel am-panel-default wb-message" id="message_box">
+
+                <div class="am-panel am-panel-default am-animation-slide-bottom" data-doc-animation="slide-bottom">
+                    <div class="am-panel-hd">管理员</div>
+                        <div class="am-panel-bd">欢迎来到悄悄说即时通信工具，在这里你可以向全网的朋友说悄悄话~</div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</section>
+<section>
+    <div class="am-g am-g-fixed wb-control" id="control_panel">
+        <div class="am-u-sm-10 am-u-sm-centered" >
+            <div class="am-input-group">
+                <span class="am-input-group-label">昵称</span>
+                <input type="text" class="am-form-field" placeholder="Nickname" id="nickname">
+            </div>
+            <textarea class="wb-textarea" rows="4" id="message" maxlength="63000"></textarea>
+            <button type="button" class="am-btn am-btn-success
+                am-radius am-fr" onclick="recvMessage()">接收
+            </button>
+            <button type="button" class="am-btn am-btn-success
+                am-radius am-fr" onclick="sendMessage()">发送
+            </button>
+        </div>
+    </div>
+</section>
+<section>
+    <div class="am-modal am-modal-no-btn" tabindex="-1" id="tip-modal">
+        <div class="am-modal-dialog wb-dialog">
+            <div class="am-modal-hd">提示
+            </div>
+            <div class="am-modal-bd">网络链接似乎已断开，请尝试重新接入</div>
+            <button type="button" class="am-btn am-btn-danger
+                am-radius" onclick="reload()">关闭</button>
+        </div>
+    </div>
+</div>
+</section>
+</body>
+  <!-- import Vue before Element -->
+  <script src="{{url_for('static',filename='jquery-3.3.1.min.js')}}"></script>
+  <!-- import JavaScript -->
+  <script src="{{url_for('static',filename='amazeui.min.js')}}"></script>
+  <script>
+  function sendMessage(){
+      nickname = $('#nickname').val();
+      message = $('#message').val();
+      if(nickname.length<1||message.length<1){
+          return;
+      }
+      $.ajax({
+          url: '/send',
+          dataType: 'json',
+          type:'post',
+          data:{
+              "nickname": nickname,
+              "message": message
+          },
+          success:function(result){
+              if(result.status=="success"){
+                  console.log('Send message complete.');
+              }else{
+                  $('#tip-modal').modal();
+              }
+          }
+      });
+  }
+  function recvTimer(){
+      setInterval(recvMessage,1200);
+  }
+  //recvTimer();
+  function recvMessage(){
+      $.ajax({
+          url: '/recv',
+          type:'get',
+          success:function(result){
+              if(result.status=="success"){
+                  message_data = result.data;
+                  for(i=0;i<message_data.length;i++){
+                      addMessage(message_data.nickname,
+                          message_data.message,
+                          message_data.nickname==$('#nickname').val()?
+                            "am-panel-success":"am-panel-default"
+                      )
+                  }
+              }else{
+                  $('#tip-modal').modal();
+              }
+          }
+      });
+  }
+  function addMessage(message_nick, message_text, message_class){
+      $('#message_box').append(
+          '<div class="am-panel '+message_class+' am-animation-slide-bottom" data-doc-animation="slide-bottom">'
+              +'<div class="am-panel-hd">'+message_nick+'</div>'
+                  +'<div class="am-panel-bd">'+message_text+'</div>'
+          +'</div>'
+      );
+  }
+  function reload(){
+      window.location="/"
+  }
+  function rebox(){
+      $('#message_panel').css('height', $(window).height()-$('#control_panel').height()-130);
+      $('#message_box').css('height', $('#message_panel').height()-10);
+  }
+  rebox();
+  $(window).resize(function () {
+      rebox ();
+  });
+  </script>
+
+</html>

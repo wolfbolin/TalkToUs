@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>悄悄说</title>
+  <!-- import CSS -->
+  <link rel="stylesheet" href="{{url_for('static',filename='amazeui.min.css')}}">
+  <style>
+  .wb-title{
+      font-size: 2.6em;
+  }
+  .wb-text{
+      font-size: 0.8em;
+  }
+  .wb-button{
+      padding: 1em;
+  }
+  </style>
+</head>
+<body>
+<header>
+    <div class="am-g am-g-fixed">
+        <div class="am-u-sm-6 am-u-sm-centered" id="text">
+            <p class="wb-title">悄悄说...</p>
+            <p class="wb-text">想说什么？快进来讲讲吧</p>
+        </div>
+    </div>
+</header>
+<section>
+    <div class="am-g am-g-fixed">
+        <div class="am-u-sm-4 am-u-sm-centered wb-button">
+            <button type="button" class="am-btn am-btn-success am-btn-block" onclick="login()">
+                进入群聊
+            </button>
+        </div>
+    </div>
+</section>
+</body>
+  <!-- import Vue before Element -->
+  <script src="{{url_for('static',filename='jquery-3.3.1.min.js')}}"></script>
+  <!-- import JavaScript -->
+  <script src="{{url_for('static',filename='amazeui.min.js')}}"></script>
+  <script>
+  function login(){
+      self.location="/login";
+  }
+  function rebox(){
+      $('#text').css('padding-top', $(window).height()/3);
+  }
+  rebox();
+  $(window).resize(function () {
+      rebox ();
+  });
+  </script>
+</html>
