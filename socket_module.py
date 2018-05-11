@@ -46,8 +46,11 @@ class SocketService:
 
     def recv(self):
         message_list = {}
+        message_num = 0
         while self.recv_data.qsize() > 0:
-            message_list['mid'+len(message_list)]=json.loads(self.recv_data.get())
+            message_list[len(message_list)]=json.loads(self.recv_data.get())
+            message_num += 1
+        message_list['message_num']=message_num
         return message_list
 
 

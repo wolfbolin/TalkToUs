@@ -2,12 +2,16 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>悄悄说</title>
+  <title>Talk to us</title>
   <!-- import CSS -->
   <link rel="stylesheet" href="{{url_for('static',filename='amazeui.min.css')}}">
   <style>
+  .wb-title{
+      padding: 0.5em 2em 0.3em;
+      margin: 0;
+  }
   .wb-message{
-      margin: 1.2em;
+      margin: 0 1.2em 0;
       padding: 1em;
       overflow: auto;
   }
@@ -25,6 +29,13 @@
   </style>
 </head>
 <body>
+<header>
+    <div class="am-g am-g-fixed" id="message_tltle">
+        <div class="am-u-sm-10 am-u-sm-centered">
+            <h1 class="wb-title">一起来畅所欲言吧~</h1>
+        </div>
+    </div>
+</header>
 <section>
     <div class="am-g am-g-fixed" id="message_panel">
         <div class="am-u-sm-10 am-u-sm-centered">
@@ -32,7 +43,7 @@
 
                 <div class="am-panel am-panel-default am-animation-slide-bottom" data-doc-animation="slide-bottom">
                     <div class="am-panel-hd">管理员</div>
-                        <div class="am-panel-bd">欢迎来到悄悄说即时通信工具，在这里你可以向全网的朋友说悄悄话~</div>
+                        <div class="am-panel-bd">欢迎来到Talk to us即时通信工具，在这里你可以向全网的朋友说悄悄话~</div>
                 </div>
 
 
@@ -49,10 +60,7 @@
             </div>
             <textarea class="wb-textarea" rows="4" id="message" maxlength="63000"></textarea>
             <button type="button" class="am-btn am-btn-success
-                am-radius am-fr" onclick="recvMessage()">接收
-            </button>
-            <button type="button" class="am-btn am-btn-success
-                am-radius am-fr" onclick="sendMessage()">发送
+                am-radius am-fr" onclick="sendMessage()">发送(Ctrl+Enter)
             </button>
         </div>
     </div>
@@ -75,6 +83,13 @@
   <!-- import JavaScript -->
   <script src="{{url_for('static',filename='amazeui.min.js')}}"></script>
   <script>
+  document.onkeydown = function(e) {
+        var keyCode = e.keyCode || e.which || e.charCode;
+        var ctrlKey = e.ctrlKey || e.metaKey;
+        if(ctrlKey && keyCode == 13) {
+            sendMessage();
+        }
+    }
   function sendMessage(){
       nickname = $('#nickname').val();
       message = $('#message').val();
@@ -91,7 +106,8 @@
           },
           success:function(result){
               if(result.status=="success"){
-                  console.log('Send message complete.');
+                  //console.log('Send message complete.');
+                  $('#message').val("");
               }else{
                   $('#tip-modal').modal();
               }
@@ -99,20 +115,23 @@
       });
   }
   function recvTimer(){
-      setInterval(recvMessage,1200);
+      setInterval(recvMessage,2000);
   }
-  //recvTimer();
+  recvTimer();
   function recvMessage(){
       $.ajax({
           url: '/recv',
           type:'get',
           success:function(result){
-              if(result.status=="success"){
-                  message_data = result.data;
-                  for(i=0;i<message_data.length;i++){
-                      addMessage(message_data.nickname,
-                          message_data.message,
-                          message_data.nickname==$('#nickname').val()?
+              //console.log(result);
+              message_data = JSON.parse(result)
+              if(message_data.status=="success"){
+                  message_num = message_data.message_num;
+                  for(i=0;i<message_num;i++){
+                      message=message_data[i.toString()]
+                      addMessage(message.nickname,
+                          message.message,
+                          message.nickname==$('#nickname').val()?
                             "am-panel-success":"am-panel-default"
                       )
                   }
@@ -124,18 +143,21 @@
   }
   function addMessage(message_nick, message_text, message_class){
       $('#message_box').append(
-          '<div class="am-panel '+message_class+' am-animation-slide-bottom" data-doc-animation="slide-bottom">'
+          '<div class="am-panel '+message_class+' am-animation-fade">'
               +'<div class="am-panel-hd">'+message_nick+'</div>'
                   +'<div class="am-panel-bd">'+message_text+'</div>'
           +'</div>'
       );
+      $('#message_box').smoothScroll({position: $('#message_box').height()});
   }
   function reload(){
       window.location="/"
   }
   function rebox(){
-      $('#message_panel').css('height', $(window).height()-$('#control_panel').height()-130);
-      $('#message_box').css('height', $('#message_panel').height()-10);
+      $('#message_panel').css('height', $(window).height()
+                -$('#control_panel').height()
+                -$('#message_tltle').height()-50);
+      $('#message_box').css('height', $('#message_panel').height());
   }
   rebox();
   $(window).resize(function () {
