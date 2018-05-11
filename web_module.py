@@ -2,10 +2,12 @@
 # -*- coding: utf-8 -*-
 import json
 import sys
-import multiprocessing
+import threading
+import webbrowser
 from PyQt5.QtCore import QUrl
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWebEngineWidgets import QWebEnginePage, QWebEngineView
+import multiprocessing
 from flask import Flask, render_template, redirect, url_for, jsonify, request
 from socket_module import SocketService
 
@@ -53,17 +55,30 @@ def recv():
     return json.dumps(message_list)
 
 
-def runBrowser():
+def running_web():
+    global web
+    web.run()
+
+
+def running_win():
     app = QApplication(sys.argv)
     browser = QWebEngineView()
-    browser.load(QUrl("http://127.0.0.1:5000/"))
+    browser.load(QUrl("http://127.0.0.1:5000"))
     browser.show()
     app.exec_()
 
 
 if __name__ == '__main__':
-    multiprocessing.Process(target=runBrowser).start()
-    web.run()
+    (web_push, web_pop) = multiprocessing.Pipe()
+    web_service = threading.Thread(target=running_web)
+    win_service = threading.Thread(target=running_win)
+    web_service.setDaemon(True)
+    web_service.start()
+    win_service.start()
+    win_service.join()
+
+
+
 
 
 
