@@ -69,7 +69,6 @@ def running_win():
 
 
 if __name__ == '__main__':
-    (web_push, web_pop) = multiprocessing.Pipe()
     web_service = threading.Thread(target=running_web)
     win_service = threading.Thread(target=running_win)
     web_service.setDaemon(True)
