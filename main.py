@@ -69,7 +69,7 @@ def running_win():
 
 
 class SocketService:
-    PORT = 12888
+    PORT = 12877
     MODE = '<broadcast>'
 
     send_client = None
@@ -116,8 +116,10 @@ class SocketService:
 
 
 if __name__ == '__main__':
-    web_service = threading.Thread(target=running_web)
     win_service = threading.Thread(target=running_win)
+
+    web_service = threading.Thread(target=running_web)
+
     web_service.setDaemon(True)
     web_service.start()
     win_service.start()
